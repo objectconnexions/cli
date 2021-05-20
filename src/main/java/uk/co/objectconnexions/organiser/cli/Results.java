@@ -1,7 +1,7 @@
 package uk.co.objectconnexions.organiser.cli;
 
-public class CommandResults {
-	private static final String NEWLINE = "\n";
+public class Results {
+	private static final String NEWLINE = System.lineSeparator();
 	
 	private StringBuffer buffer = new StringBuffer();
 	private int lineCount = 1;
@@ -63,7 +63,6 @@ public class CommandResults {
 		}
 	}
 	
-
 	public void debug(String text) {
 		appendLine("[" + text + "]");
 		

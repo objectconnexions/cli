@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Parameters {
+public class Request {
 
 	private static Map<Class<?>, OptionConversion<?>> converters = new HashMap<>();
 	
@@ -19,16 +19,20 @@ public class Parameters {
 		converters.put(cls, conversion);
 	}
 	
-	
-	private Map<String, String> options = new HashMap<>(); 
-	
-	private String firstToken;
-	private String parameterString;
+	private final Map<String, String> options = new HashMap<>(); 
+	private final CommandContext<?> context;
+	private final String firstToken;
+	private String parameters;
 	private boolean isCommand;
 
-	public Parameters(String input) {
-		parameterString = input;
+	public Request(CommandContext<?> context, String input) {
+		this.context = context;
+		parameters = input;
 		firstToken = getNextToken();
+	}
+	
+	public CommandContext<?> getContext() {
+		return context;
 	}
 	
 	public void setIsCommand() {
@@ -45,12 +49,12 @@ public class Parameters {
 	}
 
 	public String getAll() {
-		if (parameterString.length() == 0) {
+		if (parameters.length() == 0) {
 			return firstToken;
 		} else if (isCommand) {
-			return parameterString;
+			return parameters;
 		} else {
-			return firstToken + " " + parameterString;
+			return firstToken + " " + parameters;
 		}
 	}
 
@@ -61,17 +65,17 @@ public class Parameters {
 	
 	public String getNextToken() {
 		String token;
-		parameterString = parameterString.trim();
-		int breakAt = parameterString.indexOf(' ');
+		parameters = parameters.trim();
+		int breakAt = parameters.indexOf(' ');
 		if (breakAt == -1) {
-			token = parameterString;
-			parameterString = "";
+			token = parameters;
+			parameters = "";
 			if (token.length() == 0) {
 				token = null;
 			}
 		} else {
-			token = parameterString.substring(0, breakAt).trim();
-			parameterString = parameterString.substring(breakAt + 1).trim();
+			token = parameters.substring(0, breakAt).trim();
+			parameters = parameters.substring(breakAt + 1).trim();
 		}
 		return token;
 	}
@@ -100,33 +104,26 @@ public class Parameters {
 	}
 	
 	public String getRemainder() {
-		return parameterString;
+		return parameters;
 	}
 
 	public String getRemainderOr(String defaultValue) {
-		return parameterString == null ? defaultValue : parameterString;
+		return parameters == null || parameters.isEmpty() ? defaultValue : parameters;
 	}
 	
 	
 	private void processOptions() {
-		while (parameterString.length() != 0) {
+		while (parameters.length() != 0) {
 			String token = getNextToken();
 			if (token.startsWith("-")) {
 				String flag = token.substring(1);
 				String content = getNextToken();
 				options.put(flag, content);
 			} else {
-				parameterString = token + " " + parameterString;
+				parameters = token + " " + parameters;
 				break;
 			}
 		}
 	}
-	
-	
-/*
-	public boolean hasNoParameters() {
-		return parameterString.length() == 0;
-	}
-*/
 
 }
